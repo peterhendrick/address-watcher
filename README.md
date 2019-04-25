@@ -1,68 +1,46 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+PERN Full Stack fake cryptocurrency trading app
+=======
 
-## Available Scripts
+tradingApp is a website where you can register to login and make fake trades between btc, ltc, xmr, salt, doge and usd. It is built using Postgres, Express, React - Redux, and Node.js
 
-In the project directory, you can run:
+For a live example of this full stack app running visit https://cryptotradingapp.herokuapp.com/
 
-### `npm start`
+**Author:** Peter Hendrick
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Requirements and Downloading
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+To use tradingApp, you need:
 
-### `npm test`
+* Node.js
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+* tsc - a typescript compiler (npm install -g tsc)
 
-### `npm run build`
+* postgres - you need a postgres server running locally. For mac users, you can run:
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+brew install postgres && brew services start postgres
+```
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+To download locally, run:
+```bash
+git clone https://github.com/peterhendrick/tradingApp && cd tradingApp
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+To install run:
+```bash
+npm install && npm run build
+```
 
-### `npm run eject`
+You can now run the app locally (on the condition that you provide the proper database connection environment variables)
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+You'll need to add the following node environment variables to connect to a database locally.
+DB  - the database name you'd like to connect to.
+HOST  - the postgres server you'd like to connect to.
+DB_PASS  - your database user password
+DB_PORT  - the port your postgres server is running on
+DB_USER  - the username of your database user.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+The app will run on port 5000. To use the app visit localhost:5000 and click register. Enter a username and password (passwords are hashed on the client and stored hashed in the database. Plaintext passwords are not sent to the server). Once registered, you can then login.
 
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+Each account will be given a fake $10000 usd to begin trading. All trades must use BTC. Once you have BTC, you can trade among other cryptos or back to usd. Current rates are updated every 60 seconds on the server through the Shapeshift API (cryptos) and the Coinbase API (usd).
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify

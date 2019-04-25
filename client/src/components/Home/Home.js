@@ -1,13 +1,15 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './Home.css';
 
 class Home extends React.Component {
     constructor() {
         super();
         this.state = { addresses: [], testNet: true, addressEntered: '', btcDisplayPrice: 'Waiting For Coincap.io', validAddress: true };
+        const addresses = JSON.parse(localStorage.getItem('addresses'));
+        if (addresses) this.state.addresses = addresses;
 
         this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillUnmount = this.componentWillUnmount.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleBitcoinPrice = this.handleBitcoinPrice.bind(this);
@@ -22,10 +24,6 @@ class Home extends React.Component {
         this.bitcoinPriceWs = bitcoinPriceWs;
     }
 
-    componentWillUnmount() {
-        this.bitcoinPriceWs.close();
-        this.addressWs.close();
-    }
 
     handleAddressMsg(response) {
         console.log('Getting address response');
@@ -89,6 +87,7 @@ class Home extends React.Component {
                 const addrOutput = tx.outputs.find(output => output.addresses.includes(data.payload.address));
                 const paymentAmount = addrOutput.value_int;
                 address.txs.push({ id: tx.txid, amount: paymentAmount });
+                _updatedLocalStorage(address);
                 console.log(address);
                 console.log(tx);
                 console.log(paymentAmount);
@@ -101,10 +100,22 @@ class Home extends React.Component {
                 console.log('Address Websocket closing');
                 console.log(event);
             }
+            let addresses = localStorage.getItem('addresses');
+            if (!addresses) addresses = [];
+            addresses.push({address: this.state.addressEntered, txs: []});
+            localStorage.setItem('addresses', JSON.stringify(addresses));
             this.setState(state => {
-                state.addresses.push({ address: state.addressEntered, txs: [], balance: '' });
+                state.addresses.push({ address: state.addressEntered, txs: [] });
                 return state;
             });
+        }
+        function _updatedLocalStorage(addr) {
+            let addresses = localStorage.getItem('addresses');
+            addresses = addresses.map(add => {
+                if(add.address === addr.address) return addr;
+                return add;
+            });
+            localStorage.setItem('addresses', addresses);
         }
     }
 
@@ -137,11 +148,11 @@ class Home extends React.Component {
 
     render() {
         return (
-            <div className="App">
-                <header className="App-header">
-                    An address watching app by Peter Hendrick
+            <div className="Home">
+                <header className="Home-header">
+                    An Address Watching App by Peter Hendrick
                 </header>
-                <body>
+                <body className="Home-body">
                 <label>
                         Bitcoin Price: {this.state.btcDisplayPrice}
                     </label>
@@ -168,11 +179,11 @@ class Home extends React.Component {
                         {this.state.addresses.map((addr, index) => {
                             return (
                                 <div key={index}>
-                                    <ul> Address {index + 1}: {addr.address}</ul>
+                                    <ul> Address {index + 1}: <Link to={{pathname: '/address/' + addr.address}}>{addr.address}</Link></ul>
                                     {
                                         addr.txs.map((tx, ind) => {
                                             return (
-                                                <ul key={tx.id}>{ind + 1} txid: {tx.id.substring(0, 5)}... amount: {tx.amount} sat currentUSDValue: {tx.amount / 100000000 * this.state.btcPrice}</ul>
+                                                <ul key={tx.id}>{ind + 1} txid: <Link to={{pathname: '/transaction/' + tx.id}}>{tx.id.substring(0, 5)}...</Link> amount: {tx.amount} sat currentUSDValue: {tx.amount / 100000000 * this.state.btcPrice}</ul>
                                             )
                                         })
                                     }
