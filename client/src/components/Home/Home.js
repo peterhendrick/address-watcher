@@ -6,22 +6,105 @@ class Home extends React.Component {
     constructor() {
         super();
         this.state = { addresses: [], testNet: true, addressEntered: '', btcDisplayPrice: 'Waiting For Coincap.io', validAddress: true };
-        const addresses = JSON.parse(localStorage.getItem('addresses'));
-        if (addresses) this.state.addresses = addresses;
+
 
         this.componentDidMount = this.componentDidMount.bind(this);
+        this.componentWillUnmount = this.componentWillUnmount.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleBitcoinPrice = this.handleBitcoinPrice.bind(this);
         this.handleAddressMsg = this.handleAddressMsg.bind(this);
         this.clearAddresses = this.clearAddresses.bind(this);
         this.clearTransactions = this.clearTransactions.bind(this);
+        this.subscribeMany = this.subscribeMany.bind(this);
+        this.subscribe = this.subscribe.bind(this);
     }
 
     componentDidMount() {
         const bitcoinPriceWs = new WebSocket('wss://ws.coincap.io/prices?assets=bitcoin');
         bitcoinPriceWs.onmessage = this.handleBitcoinPrice;
         this.bitcoinPriceWs = bitcoinPriceWs;
+
+        const addresses = JSON.parse(localStorage.getItem('addresses'));
+        if (addresses) {
+            this.setState(state => {
+                state.addresses = addresses;
+            });
+            this.subscribeMany(addresses);
+        }
+    }
+
+    componentWillUnmount() {
+
+    }
+
+    subscribeMany(addresses) {
+        if (addresses.length) {
+            addresses.forEach(address => {
+                this.subscribe(address.address);
+            });
+        }
+    }
+
+    subscribe(address) {
+        const addressWs = new WebSocket(`wss://testnet-ws.smartbit.com.au/v1/blockchain`);
+        addressWs.onopen = () => {
+            console.log('Address Websocket connected');
+            console.log(address)
+            addressWs.send(JSON.stringify({ type: 'address', address }))
+            this.setState(state => {
+                state.addressEntered = '';
+            });
+        }
+        addressWs.onmessage = (response) => {
+            console.log('AddressWs Response');
+            console.log(response);
+            const data = JSON.parse(response.data);
+            if (data.type === 'heartbeat') return;
+            if (data.payload.message && data.payload.message.includes('invalid')) {
+                const address = data.payload.message.split(' ')[0];
+                this.setState(state => {
+                    state.addresses = state.addresses.filter(addr => addr.address !== address);
+                    return state;
+                })
+                alert('Address is invalid');
+                return;
+            }
+            if (data.payload.message && data.payload.message.includes('Successfully subscribed to address')) {
+                const address = data.payload.message.split(' ').pop();
+                this.setState(state => {
+                    const addressObj = state.addresses.find(addr => addr.address === address);
+                    addressObj.websocket = addressWs;
+                })
+                return;
+            }
+            const address = this.state.addresses.find(add => add.address === data.payload.address);
+            const tx = data.payload.transaction;
+            const addrOutput = tx.outputs.find(output => output.addresses.includes(data.payload.address));
+            const paymentAmount = addrOutput.value_int;
+            address.txs.push({ id: tx.txid, amount: paymentAmount });
+            _updatedLocalStorage(address);
+            console.log(address);
+            console.log(tx);
+            console.log(paymentAmount);
+        }
+        addressWs.onerror = (err) => {
+            console.log(`Websocket error`);
+            console.log(err);
+        }
+        addressWs.onclose = (event) => {
+            console.log('Address Websocket closing');
+            console.log(event);
+        }
+        function _updatedLocalStorage(addr) {
+            let addresses = JSON.parse(localStorage.getItem('addresses'));
+            addresses = addresses.map(add => {
+                if (add.address === addr.address) return addr;
+                return add;
+            });
+            localStorage.setItem('addresses', JSON.stringify(addresses));
+        }
+        return addressWs;
     }
 
 
@@ -57,65 +140,15 @@ class Home extends React.Component {
                 return state;
             });
         } else {
-            const addressWs = this.state.testNet ? new WebSocket(`wss://testnet-ws.smartbit.com.au/v1/blockchain`) : new WebSocket('wss://ws.smartbit.com.au/v1/blockchain');
-            addressWs.onopen = () => {
-                console.log('Address Websocket connected');
-                console.log(this.state.addressEntered)
-                addressWs.send(JSON.stringify({ type: "address", address: this.state.addressEntered }))
-                this.setState(state => {
-                    state.addressEntered = '';
-                    return state;
-                });
-            }
-            addressWs.onmessage = (response) => {
-                console.log('AddressWs Response');
-                console.log(response);
-                const data = JSON.parse(response.data);
-                if (data.type === 'heartbeat') return;
-                if (data.payload.message && data.payload.message.includes('invalid')) {
-                    const address = data.payload.message.split(' ')[0];
-                    this.setState(state => {
-                        state.addresses = state.addresses.filter(addr => addr.address !== address);
-                        return state;
-                    })
-                    alert('Address is invalid');
-                    return;
-                }
-                if (data.payload.message && data.payload.message.includes('Successfully subscribed to address')) return;
-                const address = this.state.addresses.find(add => add.address === data.payload.address);
-                const tx = data.payload.transaction;
-                const addrOutput = tx.outputs.find(output => output.addresses.includes(data.payload.address));
-                const paymentAmount = addrOutput.value_int;
-                address.txs.push({ id: tx.txid, amount: paymentAmount });
-                _updatedLocalStorage(address);
-                console.log(address);
-                console.log(tx);
-                console.log(paymentAmount);
-            }
-            addressWs.onerror = (err) => {
-                console.log(`Websocket error`);
-                console.log(err);
-            }
-            addressWs.onclose = (event) => {
-                console.log('Address Websocket closing');
-                console.log(event);
-            }
-            let addresses = localStorage.getItem('addresses');
+            this.subscribe(this.state.addressEntered);
+            let addresses = JSON.parse(localStorage.getItem('addresses'));
             if (!addresses) addresses = [];
-            addresses.push({address: this.state.addressEntered, txs: []});
+            addresses.push({ address: this.state.addressEntered, txs: [] });
             localStorage.setItem('addresses', JSON.stringify(addresses));
             this.setState(state => {
                 state.addresses.push({ address: state.addressEntered, txs: [] });
                 return state;
             });
-        }
-        function _updatedLocalStorage(addr) {
-            let addresses = localStorage.getItem('addresses');
-            addresses = addresses.map(add => {
-                if(add.address === addr.address) return addr;
-                return add;
-            });
-            localStorage.setItem('addresses', addresses);
         }
     }
 
@@ -125,6 +158,7 @@ class Home extends React.Component {
             state.addresses = [];
             return state;
         });
+        localStorage.removeItem('addresses');
     }
 
     testNetChange() {
@@ -152,8 +186,8 @@ class Home extends React.Component {
                 <header className="Home-header">
                     An Address Watching App by Peter Hendrick
                 </header>
-                <body className="Home-body">
-                <label>
+                <div className="Home-body">
+                    <label>
                         Bitcoin Price: {this.state.btcDisplayPrice}
                     </label>
                     <form>
@@ -179,11 +213,11 @@ class Home extends React.Component {
                         {this.state.addresses.map((addr, index) => {
                             return (
                                 <div key={index}>
-                                    <ul> Address {index + 1}: <Link to={{pathname: '/address/' + addr.address}}>{addr.address}</Link></ul>
+                                    <ul> Address {index + 1}: <Link to={{ pathname: '/address/' + addr.address }}>{addr.address}</Link></ul>
                                     {
                                         addr.txs.map((tx, ind) => {
                                             return (
-                                                <ul key={tx.id}>{ind + 1} txid: <Link to={{pathname: '/transaction/' + tx.id}}>{tx.id.substring(0, 5)}...</Link> amount: {tx.amount} sat currentUSDValue: {tx.amount / 100000000 * this.state.btcPrice}</ul>
+                                                <ul key={tx.id}>{ind + 1} txid: <Link to={{ pathname: '/transaction/' + tx.id }}>{tx.id.substring(0, 5)}...</Link> - amount: {tx.amount} sat - Value: ${parseFloat(Number(tx.amount / 100000000).toFixed(6)) * this.state.btcPrice}</ul>
                                             )
                                         })
                                     }
@@ -193,7 +227,7 @@ class Home extends React.Component {
                     </div>
                     <input type="submit" value="Clear Addresses" onClick={this.clearAddresses} />
                     <input type="submit" value="Clear Transactions" onClick={this.clearTransactions} />
-                </body>
+                </div>
             </div>
         );
     }
