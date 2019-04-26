@@ -16,8 +16,8 @@ class Address extends React.Component {
 
     fetchAddress() {
         fetch('/address/' + this.state.addr)
-            .then((response) => response.json())
-            .then((data) => {
+            .then(response => response.json())
+            .then(data => {
                 console.log('Response');
                 console.log(data.address);
                 console.log(data.ticker);
