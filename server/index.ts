@@ -26,10 +26,11 @@ app.route('/transaction/:txId').get(async (req: express.Request, res: express.Re
     const txId = req.params.txId;
     const testnetExplorer = blockexplorer.usingNetwork(3);
     try {
-        const tx = await Promise.all([testnetExplorer.getTx(txId), exchange.getTicker()]);
+        const [tx, ticker] = await Promise.all([testnetExplorer.getTx(txId), exchange.getTicker()]);
         if (!tx) res.json({address: '404 not found'}); // TODO: 404
 
-        res.json(tx);
+        const response = {tx, ticker};
+        res.json(response);
     } catch (err) {
         console.log(err);
         res.json(err);
