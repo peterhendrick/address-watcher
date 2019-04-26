@@ -4,41 +4,40 @@ import './Address.css';
 class Address extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { address: props.match.params.addrId };
+        this.state = { addr: props.match.params.addrId, addressObject: {} };
         // this.testnetExplorer = blockexplorer.usingNetwork(3);
         this.componentDidMount = this.componentDidMount.bind(this);
+        this.fetchAddress = this.fetchAddress.bind(this);
     }
 
-    async componentDidMount() {
-        try {
-            // const address = await blockexplorer.getAddress(this.state.address);
-            // if(address) {
-            //     this.setState(state =>{
-            //         state.addressObject = address;
-            //     });
-            //     console.log(this.state.addressObject);
-            // }
-        } catch (err) {
-            console.log(err);
-        }
+    componentDidMount() {
+        this.fetchAddress();
+    }
 
-        // const blockchainWS = new Socket({ network: 3 });
-        // blockchainWS.onOpen(() => {
-        //     console.log('Websocket open');
-        // });
-        // blockchainWS.onTransaction(processTransaction, {addresses: [this.state.address.addr] });
-        // const address = await this.testnetExplorer.getAddress(this.state.address.addr);
-        // console.log(address);
-
-        function processTransaction(tx) {
-            this.state.address.txs.push(tx);
-        }
+    fetchAddress() {
+        fetch('/address/' + this.state.addr)
+            .then((response) => response.json())
+            .then((data) => {
+                console.log('Response');
+                console.log(data.address);
+                console.log(data.ticker);
+                this.setState(state => {
+                    state.addressObject = data.address;
+                    state.dollarBalance = Number(state.addressObject.final_balance / 100000000 * data.ticker.USD.last ).toFixed(6);
+                    return state;
+                });
+                console.log(this.state);
+            })
+            .catch(err => console.log(err));
     }
 
 
     render() {
         return (
-            <div>Address Page {this.state.address}</div>
+            <div>Address Page
+                Address: {this.state.addr} Balance: {this.state.addressObject.final_balance} satoshis ${this.state.dollarBalance}
+                {/* <ul>{this.addres.transactions}</ul> */}
+            </div>
         );
     }
 }
