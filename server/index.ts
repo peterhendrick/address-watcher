@@ -2,10 +2,11 @@ import { blockexplorer } from 'blockchain.info';
 import * as bodyParser from 'body-parser';
 import * as cors from 'cors';
 import * as express from 'express';
+import * as mongodb from 'mongodb';
 import * as path from 'path';
-// import { api } from './api';
 const app = express();
 const port = process.env.PORT || 5000;
+const clientPath = process.env.ENVIRONMENT === 'Develop' ? '../client/public/' : '../client/build';
 
 app.use(cors());
 app.use(express.static(path.join(__dirname, '../client/build')));
@@ -36,21 +37,24 @@ app.route('/transaction/:txId').get(async (req: express.Request, res: express.Re
 
 });
 
-app.route('/address/:addr').get(async (req: express.Request, res: express.Response) => {
-    const addr = req.params.addr;
-    const testnetExplorer = blockexplorer.usingNetwork(3);
-    try {
-        const tx = await testnetExplorer.getAddress(addr);
-        if (!tx) res.render('index'); // TODO: 404
+app.route('/address/:addr')
+    .get(async (req: express.Request, res: express.Response) => {
+        const addr = req.params.addr;
+        const testnetExplorer = blockexplorer.usingNetwork(3);
+        try {
+            const address = await testnetExplorer.getAddress(addr);
+            if (!address) res.render('index'); // TODO: 404
 
-        res.json(tx);
-    } catch (err) {
-        console.log(err);
-        res.json(err);
-    }
+            res.json(address);
+        } catch (err) {
+            console.log(err);
+            res.json(err);
+        }
 
-});
-
+    })
+    .post(async (req: express.Request, res: express.Response) => {
+        if (req.params.addr) await mongodb.save(req.params.addr);
+    });
 
 // Handles any requests that don't match the ones above
 app.get('*', (req: express.Request, res: express.Response) => {

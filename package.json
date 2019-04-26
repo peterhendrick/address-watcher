@@ -6,7 +6,9 @@
     "scripts": {
         "build": "npm install && tsc && npm install --prefix client && npm run --prefix client build",
         "dev": "ts-node ./src/index.ts",
-        "start": "node ./dist/index.js",
+        "client": "cd client && npm start",
+        "server": "tsc && nodemon ./server/dist/index.js",
+        "start": "concurrently - kill-others \"npm run sever\" \"npm run client\"",
         "heroku-postbuild": "tsc &&  npm install --prefix client && npm run --prefix client build"
     },
     "author": "Peter Hendrick",
@@ -19,6 +21,7 @@
         "@types/body-parser": "^1.17.0",
         "@types/express": "^4.16.1",
         "@types/node": "^10.12.24",
+        "concurrently": "^4.1.0",
         "tslint": "^5.12.1",
         "typescript": "^3.3.3"
     },
