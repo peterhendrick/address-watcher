@@ -6,7 +6,7 @@ class Home extends React.Component {
     constructor() {
         super();
         this.state = { addresses: [], testNet: true, addressEntered: '', btcDisplayPrice: 'Waiting For Coincap.io', validAddress: true };
-
+        this.wss = { clients: [] };
 
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentWillUnmount = this.componentWillUnmount.bind(this);
@@ -29,13 +29,16 @@ class Home extends React.Component {
         if (addresses) {
             this.setState(state => {
                 state.addresses = addresses;
+                return state;
             });
             this.subscribeMany(addresses);
         }
     }
 
     componentWillUnmount() {
-
+        for(const client of this.wss.clients) {
+            client.close();
+        }
     }
 
     subscribeMany(addresses) {
@@ -48,12 +51,14 @@ class Home extends React.Component {
 
     subscribe(address) {
         const addressWs = new WebSocket(`wss://testnet-ws.smartbit.com.au/v1/blockchain`);
+        this.wss.clients.push(addressWs);
         addressWs.onopen = () => {
             console.log('Address Websocket connected');
             console.log(address)
             addressWs.send(JSON.stringify({ type: 'address', address }))
             this.setState(state => {
                 state.addressEntered = '';
+                return state;
             });
         }
         addressWs.onmessage = (response) => {
@@ -75,6 +80,7 @@ class Home extends React.Component {
                 this.setState(state => {
                     const addressObj = state.addresses.find(addr => addr.address === address);
                     addressObj.websocket = addressWs;
+                    return state;
                 })
                 return;
             }
