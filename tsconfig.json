@@ -4,7 +4,10 @@
         "target": "ES6",
         "sourceMap": true,
         "outDir": "./dist/",
-        "baseUrl": "./server/"
+        "baseUrl": "./server/",
+        "typeRoots": [
+            "node_modules/@types"
+        ]
     },
     "exclude": [
         "node_modules"
