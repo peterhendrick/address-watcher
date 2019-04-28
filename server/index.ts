@@ -11,7 +11,8 @@ import * as path from 'path';
 
 // Import configuration and connect to DB
 import config from './config';
-mongoose.connect(config.dbURL + '/' + config.dbName, (err) => {
+const connectionString = process.env.MONGODB_URI || config.dbURL + '/' + config.dbName;
+mongoose.connect(connectionString, (err) => {
     if (err) throw err;
     console.log('connected to database');
 });
