@@ -46,12 +46,19 @@ const context = {
 };
 
 // Set up Express server
-app.use('/graphql', graphqlHTTP({
-    context,
-    graphiql: true,
+// app.use('/graphql', graphqlHTTP({
+//     // context,
+//     graphiql: process.env.NODE_ENV === 'development',
+//     rootValue: resolvers,
+//     schema
+// } as any));
+
+app.use('/graphql', graphqlHTTP(async (request, response, graphQLParams) => ({
+    context: request,
+    graphiql: process.env.NODE_ENV === 'development',
     rootValue: resolvers,
     schema
-} as any));
+} as any)));
 
 app.route('/transaction/:txId').get(async (req: express.Request, res: express.Response) => {
     const txId = req.params.txId;
