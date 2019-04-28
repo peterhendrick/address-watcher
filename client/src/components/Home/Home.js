@@ -5,7 +5,7 @@ import './Home.css';
 class Home extends React.Component {
     constructor() {
         super();
-        this.state = { addresses: [], testNet: true, addressEntered: '', btcDisplayPrice: 'Waiting For Coincap.io', validAddress: true };
+        this.state = { addresses: [], addressEntered: '', btcDisplayPrice: 'Waiting For Coincap.io', validAddress: true };
         this.wss = { clients: [] };
 
         this.componentDidMount = this.componentDidMount.bind(this);
@@ -175,14 +175,6 @@ class Home extends React.Component {
         localStorage.removeItem('addresses');
     }
 
-    testNetChange() {
-        this.setState(state => {
-            state.testNet = !state.testNet;
-            return state;
-        })
-    }
-
-
     clearTransactions(event) {
         event.preventDefault();
         this.setState(state => {
@@ -198,7 +190,7 @@ class Home extends React.Component {
         return (
             <div className="Home">
                 <header className="Home-header">
-                    An Address Watching App by Peter Hendrick
+                    An Address Watching App by Peter Hendrick for the Bitcoin Testnet 3
                 </header>
                 <div className="Home-body">
                     <label>
@@ -210,15 +202,6 @@ class Home extends React.Component {
                             <input type="text" value={this.state.addressEntered} name="addeess" onChange={this.handleChange} />
                         </label>
                         <input type="submit" value="Submit" onClick={this.handleSubmit} />
-                        <label>
-                            Test Net
-                            <input
-                                type="checkbox"
-                                value={this.state.testNet}
-                                checked={this.state.testNet}
-                                onChange={this.testNetChange.bind(this)}
-                            />
-                        </label>
                     </form>
                     <label>
                         Addresses Entered
