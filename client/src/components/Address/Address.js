@@ -15,20 +15,26 @@ class Address extends React.Component {
     }
 
     fetchAddress() {
-        fetch('/address/' + this.state.addr)
-            .then(response => response.json())
-            .then(data => {
-                console.log('Response');
-                console.log(data.address);
-                console.log(data.ticker);
-                this.setState(state => {
-                    state.addressObject = data.address;
-                    state.dollarBalance = Number(state.addressObject.final_balance / 100000000 * data.ticker.USD.last ).toFixed(6);
-                    return state;
-                });
-                console.log(this.state);
-            })
-            .catch(err => console.log(err));
+        const query = `{address{_id,addr}}`;
+        fetch(`/graphql?query=${query}`).then(res => res.json())
+            .then(json => {
+                console.log(json);
+                // this.setState({address: json.data.address});
+            });
+        // fetch('/address/' + this.state.addr)
+        //     .then(response => response.json())
+        //     .then(data => {
+        //         console.log('Response');
+        //         console.log(data.address);
+        //         console.log(data.ticker);
+        //         this.setState(state => {
+        //             state.addressObject = data.address;
+        //             state.dollarBalance = Number(state.addressObject.final_balance / 100000000 * data.ticker.USD.last ).toFixed(6);
+        //             return state;
+        //         });
+        //         console.log(this.state);
+        //     })
+        //     .catch(err => console.log(err));
     }
 
 
