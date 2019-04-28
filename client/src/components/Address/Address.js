@@ -1,48 +1,52 @@
 import React from 'react';
 import './Address.css';
+import { Link } from 'react-router-dom';
 
 class Address extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { addr: props.match.params.addrId, addressObject: {} };
-        // this.testnetExplorer = blockexplorer.usingNetwork(3);
+        this.state = { addr: props.match.params.addrId, addressObject: {hash: '', txs: []} };
         this.componentDidMount = this.componentDidMount.bind(this);
         this.fetchAddress = this.fetchAddress.bind(this);
     }
 
-    componentDidMount() {
-        this.fetchAddress();
+    async componentDidMount() {
+        await this.fetchAddress();
     }
 
-    fetchAddress() {
-        const query = `{address{_id,addr}}`;
-        fetch(`/graphql?query=${query}`).then(res => res.json())
-            .then(json => {
-                console.log(json);
-                // this.setState({address: json.data.address});
+    async fetchAddress() {
+        try {
+            const data = await fetch('/address/' + this.state.addr).then(response => response.json())
+            this.setState(state => {
+                state.addressObject = data.address;
+                state.dollarBalance = Number(state.addressObject.final_balance / 100000000 * data.ticker.USD.last ).toFixed(6);
+                return state;
             });
-        // fetch('/address/' + this.state.addr)
-        //     .then(response => response.json())
-        //     .then(data => {
-        //         console.log('Response');
-        //         console.log(data.address);
-        //         console.log(data.ticker);
-        //         this.setState(state => {
-        //             state.addressObject = data.address;
-        //             state.dollarBalance = Number(state.addressObject.final_balance / 100000000 * data.ticker.USD.last ).toFixed(6);
-        //             return state;
-        //         });
-        //         console.log(this.state);
-        //     })
-        //     .catch(err => console.log(err));
+            this.amountToAddress();
+            console.log(this.state);
+        } catch (err) {
+            console.log(err);
+        }
     }
-
 
     render() {
         return (
-            <div>Address Page
-                Address: {this.state.addr} Balance: {this.state.addressObject.final_balance} satoshis ${this.state.dollarBalance}
-                {/* <ul>{this.addres.transactions}</ul> */}
+            <div className="Address">
+                <header className="Address-header">
+                    Address Page
+                </header>
+                <div class="Address-body">
+                    <div class="row">Address: {this.state.addr}</div>
+                    <div class="row 2">Balance: {this.state.addressObject.final_balance} satoshis</div>
+                    <div class="row 3">${this.state.dollarBalance}</div>
+                </div>
+                <label>Transactions:
+                </label>
+                    <div>{this.state.addressObject.txs.map(tx => {
+                        return <ul>
+                            Txid: <Link to={{ pathname: '/transaction/' + tx.hash }}>{tx.hash.substring(0, 10)}...</Link>
+                        </ul>;
+                    })}</div>
             </div>
         );
     }

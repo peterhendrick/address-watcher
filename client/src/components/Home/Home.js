@@ -20,13 +20,21 @@ class Home extends React.Component {
         this.subscribe = this.subscribe.bind(this);
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         const bitcoinPriceWs = new WebSocket('wss://ws.coincap.io/prices?assets=bitcoin');
         bitcoinPriceWs.onmessage = this.handleBitcoinPrice;
         this.bitcoinPriceWs = bitcoinPriceWs;
 
-        const addresses = JSON.parse(localStorage.getItem('addresses'));
+        const query = `{addresses{_id,addr}}`;
+        const response = await fetch(`/graphql?query=${query}`).then(res => res.json());
+        const addresses = response.data && response.data.addresses ? response.data.addresses.map(address => {
+            return {
+                address: address.addr,
+                txs: address.txs ? address.txs : []
+            };
+        }) : [];
         if (addresses) {
+            localStorage.setItem('addresses', JSON.stringify(addresses));
             this.setState(state => {
                 state.addresses = addresses;
                 return state;
@@ -220,13 +228,11 @@ class Home extends React.Component {
                             return (
                                 <div key={index}>
                                     <ul> Address {index + 1}: <Link to={{ pathname: '/address/' + addr.address }}>{addr.address}</Link></ul>
-                                    {
-                                        addr.txs.map((tx, ind) => {
-                                            return (
-                                                <ul key={tx.id}>{ind + 1} txid: <Link to={{ pathname: '/transaction/' + tx.id }}>{tx.id.substring(0, 5)}...</Link> - amount: {tx.amount} sat - Value: ${parseFloat(Number(tx.amount / 100000000).toFixed(6)) * this.state.btcPrice}</ul>
-                                            )
-                                        })
-                                    }
+                                    {addr.txs.map((tx, ind) => {
+                                        return (
+                                            <ul key={tx.id}>{ind + 1} txid: <Link to={{ pathname: '/transaction/' + tx.id }}>{tx.id.substring(0, 5)}...</Link> - amount: {tx.amount} sat - Value: ${parseFloat(Number(tx.amount / 100000000).toFixed(6)) * this.state.btcPrice}</ul>
+                                        )
+                                    })}
                                 </div>
                             )
                         })}
