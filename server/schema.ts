@@ -7,8 +7,7 @@ module.exports = buildSchema(`
   }
 
   type Query {
-    hello: String
-    address: [Address]
+      addresses: [Address]
   }
 
   type Mutation {
