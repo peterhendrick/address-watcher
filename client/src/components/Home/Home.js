@@ -5,7 +5,7 @@ import './Home.css';
 class Home extends React.Component {
     constructor() {
         super();
-        this.state = { addresses: [], testNet: true, addressEntered: '', btcDisplayPrice: 'Waiting For Coincap.io', validAddress: true };
+        this.state = { addresses: [], addressEntered: '', btcDisplayPrice: 'Waiting For Coincap.io', validAddress: true };
         this.wss = { clients: [] };
 
         this.componentDidMount = this.componentDidMount.bind(this);
@@ -13,20 +13,29 @@ class Home extends React.Component {
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleBitcoinPrice = this.handleBitcoinPrice.bind(this);
-        this.handleAddressMsg = this.handleAddressMsg.bind(this);
         this.clearAddresses = this.clearAddresses.bind(this);
         this.clearTransactions = this.clearTransactions.bind(this);
         this.subscribeMany = this.subscribeMany.bind(this);
         this.subscribe = this.subscribe.bind(this);
+        this.saveAddress = this.saveAddress.bind(this);
+        this.deleteAddress = this.deleteAddress.bind(this);
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         const bitcoinPriceWs = new WebSocket('wss://ws.coincap.io/prices?assets=bitcoin');
         bitcoinPriceWs.onmessage = this.handleBitcoinPrice;
         this.bitcoinPriceWs = bitcoinPriceWs;
 
-        const addresses = JSON.parse(localStorage.getItem('addresses'));
+        const query = `{addresses{_id,addr}}`;
+        const response = await fetch(`/graphql?query=${query}`).then(res => res.json());
+        const addresses = response.data && response.data.addresses ? response.data.addresses.map(address => {
+            return {
+                address: address.addr,
+                txs: address.txs ? address.txs : []
+            };
+        }) : [];
         if (addresses) {
+            localStorage.setItem('addresses', JSON.stringify(addresses));
             this.setState(state => {
                 state.addresses = addresses;
                 return state;
@@ -114,11 +123,6 @@ class Home extends React.Component {
     }
 
 
-    handleAddressMsg(response) {
-        console.log('Getting address response');
-        console.log(response);
-    }
-
     handleBitcoinPrice(response) {
         this.setState(state => {
             if (response.data) {
@@ -167,14 +171,6 @@ class Home extends React.Component {
         localStorage.removeItem('addresses');
     }
 
-    testNetChange() {
-        this.setState(state => {
-            state.testNet = !state.testNet;
-            return state;
-        })
-    }
-
-
     clearTransactions(event) {
         event.preventDefault();
         this.setState(state => {
@@ -186,11 +182,46 @@ class Home extends React.Component {
         });
     }
 
+    async saveAddress(address, event) {
+        event.preventDefault();
+        try {
+            await fetch(`/address/${address}`, {
+                method: 'POST',
+                body: JSON.stringify({ address })
+            });
+            alert('Address saved');
+        } catch (err) {
+            console.log (err)
+        }
+    }
+
+    async deleteAddress(address, event) {
+        event.preventDefault();
+        try {
+            const data = await fetch(`/address/${address}`, {
+                method: 'DELETE',
+                body: JSON.stringify({ address })
+            }).then(res => res.json());
+
+            console.log(data);
+            if(data.addr){
+                this.setState(state => {
+                    state.addresses = state.addresses.filter(address => address.address !== data.addr);
+                    return state;
+                });
+            };
+            console.log(this.state);
+            alert('Address deleted');
+        } catch (err) {
+            console.log (err)
+        }
+    }
+
     render() {
         return (
             <div className="Home">
                 <header className="Home-header">
-                    An Address Watching App by Peter Hendrick
+                    An Address Watching App by Peter Hendrick for the Bitcoin Testnet v3
                 </header>
                 <div className="Home-body">
                     <label>
@@ -202,15 +233,6 @@ class Home extends React.Component {
                             <input type="text" value={this.state.addressEntered} name="addeess" onChange={this.handleChange} />
                         </label>
                         <input type="submit" value="Submit" onClick={this.handleSubmit} />
-                        <label>
-                            Test Net
-                            <input
-                                type="checkbox"
-                                value={this.state.testNet}
-                                checked={this.state.testNet}
-                                onChange={this.testNetChange.bind(this)}
-                            />
-                        </label>
                     </form>
                     <label>
                         Addresses Entered
@@ -219,14 +241,15 @@ class Home extends React.Component {
                         {this.state.addresses.map((addr, index) => {
                             return (
                                 <div key={index}>
-                                    <ul> Address {index + 1}: <Link to={{ pathname: '/address/' + addr.address }}>{addr.address}</Link></ul>
-                                    {
-                                        addr.txs.map((tx, ind) => {
-                                            return (
-                                                <ul key={tx.id}>{ind + 1} txid: <Link to={{ pathname: '/transaction/' + tx.id }}>{tx.id.substring(0, 5)}...</Link> - amount: {tx.amount} sat - Value: ${parseFloat(Number(tx.amount / 100000000).toFixed(6)) * this.state.btcPrice}</ul>
-                                            )
-                                        })
-                                    }
+                                    <ul> Address {index + 1}: <Link to={{ pathname: '/address/' + addr.address }}>{addr.address}</Link>
+                                    <input type="submit" value="Save Address" onClick={this.saveAddress.bind(this, addr.address)} />
+                                    <input type="submit" value="Delete Address" onClick={this.deleteAddress.bind(this, addr.address)} />
+                                    </ul>
+                                    {addr.txs.map((tx, ind) => {
+                                        return (
+                                            <ul key={tx.id}>Transaction {ind + 1}: txid: <Link to={{ pathname: '/transaction/' + tx.id }}>{tx.id.substring(0, 5)}...</Link> - amount: {tx.amount} sat - Value: ${parseFloat(Number(tx.amount / 100000000).toFixed(6)) * this.state.btcPrice}</ul>
+                                        )
+                                    })}
                                 </div>
                             )
                         })}
