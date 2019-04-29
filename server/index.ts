@@ -108,7 +108,6 @@ app.route('/address/:addr')
         res.json(savedAddress);
     })
     .delete(async (req: express.Request, res: express.Response) => {
-        console.log(req);
         const deletedAddress = await Address.findOneAndRemove({addr: req.params.addr});
         res.json(deletedAddress);
     });
