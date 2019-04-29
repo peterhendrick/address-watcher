@@ -25,9 +25,6 @@ import * as schema from './schema';
 const app = express();
 const port = process.env.PORT || 5000;
 
-
-// const clientPath = process.env.ENVIRONMENT === 'Develop' ? '../client/public/' : '../client/build';
-
 app.use(cors());
 app.use(express.static(path.join(__dirname, '../client/build')));
 
@@ -42,18 +39,9 @@ app.post('/', (req, res) => {
     res.render('index');
 });
 
-// Define "context" just for testing
 const context = {
     greeting: 'Hello world!'
 };
-
-// Set up Express server
-// app.use('/graphql', graphqlHTTP({
-//     // context,
-//     graphiql: process.env.NODE_ENV === 'development',
-//     rootValue: resolvers,
-//     schema
-// } as any));
 
 app.use('/graphql', graphqlHTTP(async (request, response, graphQLParams) => ({
     context: request,

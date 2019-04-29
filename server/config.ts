@@ -1,5 +1,4 @@
 const config = {
-    collectionName: 'address',
     dbName: 'address-watcher',
     dbURL: 'mongodb://127.0.0.1:27017'
 };

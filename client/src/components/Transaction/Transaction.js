@@ -17,7 +17,6 @@ class Transaction extends React.Component {
 
     async fetchTransaction() {
         const response = await fetch('/transaction/' + this.state.tx.hash).then(response => response.json())
-        console.log(response);
         this.setState(state => {
             state.tx = response.tx;
             state.ticker = response.ticker.USD['15m'];

@@ -62,8 +62,6 @@ class Home extends React.Component {
         const addressWs = new WebSocket(`wss://testnet-ws.smartbit.com.au/v1/blockchain`);
         this.wss.clients.push(addressWs);
         addressWs.onopen = () => {
-            console.log('Address Websocket connected');
-            console.log(address)
             addressWs.send(JSON.stringify({ type: 'address', address }))
             this.setState(state => {
                 state.addressEntered = '';
@@ -71,8 +69,6 @@ class Home extends React.Component {
             });
         }
         addressWs.onmessage = (response) => {
-            console.log('AddressWs Response');
-            console.log(response);
             const data = JSON.parse(response.data);
             if (data.type === 'heartbeat') return;
             if (data.payload.message && data.payload.message.includes('invalid')) {
