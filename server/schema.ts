@@ -9,9 +9,4 @@ module.exports = buildSchema(`
   type Query {
       addresses: [Address]
   }
-
-  type Mutation {
-    addAddress(address: String!): Address!
-    removeAddress(address: String!): Address!
-  }
 `);
