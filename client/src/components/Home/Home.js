@@ -18,6 +18,7 @@ class Home extends React.Component {
         this.clearTransactions = this.clearTransactions.bind(this);
         this.subscribeMany = this.subscribeMany.bind(this);
         this.subscribe = this.subscribe.bind(this);
+        this.saveAddress = this.saveAddress.bind(this);
     }
 
     async componentDidMount() {
@@ -186,6 +187,20 @@ class Home extends React.Component {
         });
     }
 
+    async saveAddress(address, event) {
+        event.preventDefault();
+        // console.log(address);
+        try {
+            const data = await fetch(`/address/${address}`, {
+                method: 'POST',
+                body: JSON.stringify({ address })
+            }).then(res => res.json())
+            console.log(data);
+        } catch (err) {
+            console.log (err)
+        }
+    }
+
     render() {
         return (
             <div className="Home">
@@ -210,7 +225,9 @@ class Home extends React.Component {
                         {this.state.addresses.map((addr, index) => {
                             return (
                                 <div key={index}>
-                                    <ul> Address {index + 1}: <Link to={{ pathname: '/address/' + addr.address }}>{addr.address}</Link></ul>
+                                    <ul> Address {index + 1}: <Link to={{ pathname: '/address/' + addr.address }}>{addr.address}</Link>
+                                    <input type="submit" value="Save Address" onClick={this.saveAddress.bind(this, addr.address)} />
+                                    </ul>
                                     {addr.txs.map((tx, ind) => {
                                         return (
                                             <ul key={tx.id}>{ind + 1} txid: <Link to={{ pathname: '/transaction/' + tx.id }}>{tx.id.substring(0, 5)}...</Link> - amount: {tx.amount} sat - Value: ${parseFloat(Number(tx.amount / 100000000).toFixed(6)) * this.state.btcPrice}</ul>
