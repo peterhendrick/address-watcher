@@ -43,7 +43,7 @@ class Address extends React.Component {
                 </label>
                     <div>{this.state.addressObject.txs.map(tx => {
                         return <ul>
-                            Txid: <Link to={{ pathname: '/transaction/' + tx.hash }}>{tx.hash.substring(0, 10)}...</Link>
+                            Txid: <Link to={{ pathname: '/transaction/' + tx.hash }}>{tx.hash.substring(0, 10)}...</Link> Timestamp: {JSON.stringify(new Date(tx.time * 1000))}
                         </ul>;
                     })}</div>
             </div>
