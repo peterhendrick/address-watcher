@@ -34,10 +34,10 @@ class Address extends React.Component {
                 <header className="Address-header">
                     <Link to="/">Home</Link>Address Page
                 </header>
-                <div class="Address-body">
-                    <div class="row">Address: {this.state.addr}</div>
-                    <div class="row 2">Balance: {this.state.addressObject.final_balance} satoshis</div>
-                    <div class="row 3">${this.state.dollarBalance}</div>
+                <div className="Address-body">
+                    <div className="row">Address: {this.state.addr}</div>
+                    <div className="row 2">Balance: {this.state.addressObject.final_balance} satoshis</div>
+                    <div className="row 3">${this.state.dollarBalance}</div>
                 </div>
                 <label>Transactions:
                 </label>
