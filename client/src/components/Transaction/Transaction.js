@@ -30,7 +30,7 @@ class Transaction extends React.Component {
         return (
             <div className="Transaction">
                 <header className="Transaction-header">
-                    Transaction Page
+                    <Link to="/">Home</Link>Transaction Page
                 </header>
                 <div className="Transaction-body">
                     <div className="row">Transaction: {this.state.tx.hash}</div>
