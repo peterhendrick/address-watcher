@@ -34,6 +34,6 @@ npm install && npm run build
 You can now run the app locally as long as your mongo server is running.
 
 
-The app will run on port 5000. To use the app visit localhost:5000 and click register.
+The app will run on port 5000. To use the app visit localhost:5000.
 
-Once running you can add multiple addresses and the app will start watching those addresses for new transactions in real time. You may also click on a
+Once running you can add multiple addresses and the app will start watching those addresses for new transactions in real time. You may also click on an address after entering and visit a page that will show you all transactions found for that address. In addition, You can click into a transaction to view it's inputs and outputs.
