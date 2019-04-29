@@ -1,15 +1,11 @@
 import React from 'react';
 import { HashRouter, Route } from 'react-router-dom';
-import { Home } from './components/Home';
-import { Address } from './components/Address';
-import { Transaction } from './components/Transaction';
+import Home from './components/Home/Home';
+import Address from './components/Address/Address';
+import Transaction from './components/Transaction/Transaction';
 
 
 class App extends React.Component {
-    // constructor(props) {
-    //     super(props);
-    // }
-
     render() {
         return (
             <div >

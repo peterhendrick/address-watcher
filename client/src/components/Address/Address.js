@@ -50,4 +50,4 @@ class Address extends React.Component {
     }
 }
 
-export { Address };
+export default Address;

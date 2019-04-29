@@ -49,4 +49,4 @@ class Transaction extends React.Component {
     }
 }
 
-export { Transaction };
+export default Transaction;
