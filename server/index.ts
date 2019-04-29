@@ -3,12 +3,13 @@ import * as bodyParser from 'body-parser';
 import * as cors from 'cors';
 import * as express from 'express';
 import * as graphqlHTTP from 'express-graphql';
-// import { buildASTSchema } from 'graphql';
 // import gql from 'graphql-tag';
 // import * as mongodb from 'mongodb';
 import * as mongoose from 'mongoose';
 import * as path from 'path';
 
+import './models/addresses';
+const Address = mongoose.model('Address'); // import { buildASTSchema } from 'graphql';
 // Import configuration and connect to DB
 import config from './config';
 const connectionString = process.env.MONGODB_URI || config.dbURL + '/' + config.dbName;
@@ -95,7 +96,21 @@ app.route('/address/:addr')
 
     })
     .post(async (req: express.Request, res: express.Response) => {
-        // if (req.params.addr) await mongodb.save(req.params.addr);
+        const existingAddress = await Address.findOne({addr: req.params.addr});
+        if (existingAddress) {
+            return res.json(existingAddress);
+        }
+        const address = new Address({
+            addr: req.params.addr,
+            txs: []
+        });
+        const savedAddress = await address.save();
+        res.json(savedAddress);
+    })
+    .delete(async (req: express.Request, res: express.Response) => {
+        console.log(req);
+        const deletedAddress = await Address.findOneAndRemove({addr: req.params.addr});
+        res.json(deletedAddress);
     });
 
 // Handles any requests that don't match the ones above
