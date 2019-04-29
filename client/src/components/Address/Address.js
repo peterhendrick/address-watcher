@@ -22,7 +22,6 @@ class Address extends React.Component {
                 state.dollarBalance = Number(state.addressObject.final_balance / 100000000 * data.ticker.USD.last ).toFixed(6);
                 return state;
             });
-            this.amountToAddress();
         } catch (err) {
             console.log(err);
         }
