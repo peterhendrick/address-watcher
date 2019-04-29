@@ -212,7 +212,7 @@ class Home extends React.Component {
         return (
             <div className="Home">
                 <header className="Home-header">
-                    An Address Watching App by Peter Hendrick for the Bitcoin Testnet v3
+                    An Address Watching App by Peter Hendrick for the Bitcoin Testnet v3 <a href="https://github.com/peterhendrick/address-watcher">https://github.com/peterhendrick/address-watcher</a>
                 </header>
                 <div className="Home-body">
                     <label>
