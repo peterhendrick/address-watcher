@@ -23,7 +23,6 @@ class Address extends React.Component {
                 return state;
             });
             this.amountToAddress();
-            console.log(this.state);
         } catch (err) {
             console.log(err);
         }
