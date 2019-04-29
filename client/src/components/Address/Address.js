@@ -32,7 +32,7 @@ class Address extends React.Component {
         return (
             <div className="Address">
                 <header className="Address-header">
-                    Address Page
+                    <Link to="/">Home</Link>Address Page
                 </header>
                 <div class="Address-body">
                     <div class="row">Address: {this.state.addr}</div>
