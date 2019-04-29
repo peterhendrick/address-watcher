@@ -95,9 +95,6 @@ class Home extends React.Component {
             const paymentAmount = addrOutput.value_int;
             address.txs.push({ id: tx.txid, amount: paymentAmount });
             _updatedLocalStorage(address);
-            console.log(address);
-            console.log(tx);
-            console.log(paymentAmount);
         }
         addressWs.onerror = (err) => {
             console.log(`Websocket error`);
@@ -199,14 +196,12 @@ class Home extends React.Component {
                 body: JSON.stringify({ address })
             }).then(res => res.json());
 
-            console.log(data);
             if(data.addr){
                 this.setState(state => {
                     state.addresses = state.addresses.filter(address => address.address !== data.addr);
                     return state;
                 });
             };
-            console.log(this.state);
             alert('Address deleted');
         } catch (err) {
             console.log (err)
