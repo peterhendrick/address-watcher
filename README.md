@@ -1,4 +1,4 @@
-An address watching application using React, Node, Mongo and GraphQl
+An address watching application using React, Node, Mongo and GraphQL
 =======
 
 address-watcher is a website where you can enter a bitcoin (testnet) address and monitor transactions paid to that address.

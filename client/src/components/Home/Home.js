@@ -238,7 +238,7 @@ class Home extends React.Component {
                                     </ul>
                                     {addr.txs.map((tx, ind) => {
                                         return (
-                                            <ul key={tx.id}>Transaction {ind + 1}: txid: <Link to={{ pathname: '/transaction/' + tx.id }}>{tx.id.substring(0, 5)}...</Link> - amount: {tx.amount} sat - Value: ${parseFloat(Number(tx.amount / 100000000).toFixed(6)) * this.state.btcPrice}</ul>
+                                            <ul key={tx.id}>Transaction {ind + 1}: txid: <Link to={{ pathname: '/transaction/' + tx.id }}>{tx.id.substring(0, 5)}...</Link> - amount: {tx.amount} sat - Value: ${parseFloat(Number(tx.amount / 100000000) * this.state.btcPrice).toFixed(6)}</ul>
                                         )
                                     })}
                                 </div>
@@ -251,6 +251,7 @@ class Home extends React.Component {
             </div>
         );
     }
+
 }
 
 export default Home;
