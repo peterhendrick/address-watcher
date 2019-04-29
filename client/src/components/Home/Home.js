@@ -13,7 +13,6 @@ class Home extends React.Component {
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleBitcoinPrice = this.handleBitcoinPrice.bind(this);
-        this.handleAddressMsg = this.handleAddressMsg.bind(this);
         this.clearAddresses = this.clearAddresses.bind(this);
         this.clearTransactions = this.clearTransactions.bind(this);
         this.subscribeMany = this.subscribeMany.bind(this);
@@ -124,11 +123,6 @@ class Home extends React.Component {
     }
 
 
-    handleAddressMsg(response) {
-        console.log('Getting address response');
-        console.log(response);
-    }
-
     handleBitcoinPrice(response) {
         this.setState(state => {
             if (response.data) {
@@ -191,10 +185,10 @@ class Home extends React.Component {
     async saveAddress(address, event) {
         event.preventDefault();
         try {
-            const data = await fetch(`/address/${address}`, {
+            await fetch(`/address/${address}`, {
                 method: 'POST',
                 body: JSON.stringify({ address })
-            }).then(res => res.json());
+            });
             alert('Address saved');
         } catch (err) {
             console.log (err)
@@ -227,7 +221,7 @@ class Home extends React.Component {
         return (
             <div className="Home">
                 <header className="Home-header">
-                    An Address Watching App by Peter Hendrick for the Bitcoin Testnet 3
+                    An Address Watching App by Peter Hendrick for the Bitcoin Testnet v3
                 </header>
                 <div className="Home-body">
                     <label>
@@ -253,7 +247,7 @@ class Home extends React.Component {
                                     </ul>
                                     {addr.txs.map((tx, ind) => {
                                         return (
-                                            <ul key={tx.id}>Transaction {ind + 1} txid: <Link to={{ pathname: '/transaction/' + tx.id }}>{tx.id.substring(0, 5)}...</Link> - amount: {tx.amount} sat - Value: ${parseFloat(Number(tx.amount / 100000000).toFixed(6)) * this.state.btcPrice}</ul>
+                                            <ul key={tx.id}>Transaction {ind + 1}: txid: <Link to={{ pathname: '/transaction/' + tx.id }}>{tx.id.substring(0, 5)}...</Link> - amount: {tx.amount} sat - Value: ${parseFloat(Number(tx.amount / 100000000).toFixed(6)) * this.state.btcPrice}</ul>
                                         )
                                     })}
                                 </div>
